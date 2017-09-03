@@ -1,5 +1,11 @@
 package com.frank.vmall.app;
 
+import android.app.Activity;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+
+import com.frank.vmall.delegates.web.event.Event;
+import com.frank.vmall.delegates.web.event.EventManager;
 import com.joanzapata.iconify.IconFontDescriptor;
 import com.joanzapata.iconify.Iconify;
 
@@ -18,9 +24,11 @@ public class Configurator {
     private static final HashMap<Object, Object> MALL_CONFIGS = new HashMap<>();
     private static final ArrayList<IconFontDescriptor> ICONS = new ArrayList<>();
     private static final ArrayList<Interceptor> INTERCEPTORS = new ArrayList<>();
+    private static final Handler HANDLER = new Handler();
 
     private Configurator() {
         MALL_CONFIGS.put(ConfigKeys.CONFIG_READY, false);
+        MALL_CONFIGS.put(ConfigKeys.HANDLER, HANDLER);
     }
 
     public static Configurator getInstance() {
@@ -74,6 +82,32 @@ public class Configurator {
         return this;
     }
 
+    public final Configurator withWeChatAppID(String wechatAppID) {
+        MALL_CONFIGS.put(ConfigKeys.WE_CHAT_APP_ID, wechatAppID);
+        return this;
+    }
+
+    public final Configurator withWeChatAppSecret(String weChatAppSecret) {
+        MALL_CONFIGS.put(ConfigKeys.WE_CHAT_APP_SECRET, weChatAppSecret);
+        return this;
+    }
+
+    public final Configurator withActivity(Activity activity) {
+        MALL_CONFIGS.put(ConfigKeys.ACTIVITY, activity);
+        return this;
+    }
+
+    public final Configurator withJavascriptInterface(@NonNull String name) {
+        MALL_CONFIGS.put(ConfigKeys.JAVASCRIPT, name);
+        return this;
+    }
+
+    public final Configurator withWebEvent(@NonNull String name, @NonNull Event event) {
+        final EventManager eventManager = EventManager.getInstance();
+        eventManager.addEvent(name, event);
+        return this;
+    }
+
     private void checkConfiguration() {
         final boolean isReady = (boolean) MALL_CONFIGS.get(ConfigKeys.CONFIG_READY);
         if (!isReady) {
@@ -83,8 +117,12 @@ public class Configurator {
     }
 
     @SuppressWarnings("unchecked")
-    final <T> T getConfiguration(Enum<ConfigKeys> key) {
+    final <T> T getConfiguration(Object key) {
         checkConfiguration();
+        final Object value = MALL_CONFIGS.get(key);
+        if (value == null) {
+            throw new NullPointerException(key.toString() + "is null");
+        }
         return (T) MALL_CONFIGS.get(key);
     }
 }

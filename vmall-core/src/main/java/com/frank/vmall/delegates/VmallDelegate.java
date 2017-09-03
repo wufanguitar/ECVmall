@@ -5,4 +5,9 @@ package com.frank.vmall.delegates;
  */
 
 public abstract class VmallDelegate extends PermissionCheckerDelegate {
+
+    public <T extends VmallDelegate> T getParentDelegate() {
+        return (T) getParentFragment();
+    }
+
 }

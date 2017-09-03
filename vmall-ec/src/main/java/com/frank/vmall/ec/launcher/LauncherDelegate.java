@@ -1,13 +1,18 @@
 package com.frank.vmall.ec.launcher;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
 
+import com.frank.vmall.app.AccountManager;
+import com.frank.vmall.app.IUserChecker;
 import com.frank.vmall.delegates.VmallDelegate;
 import com.frank.vmall.ec.R;
 import com.frank.vmall.ec.R2;
+import com.frank.vmall.ui.launcher.ILauncherListener;
+import com.frank.vmall.ui.launcher.OnLauncherFinishTag;
 import com.frank.vmall.ui.launcher.ScrollLauncherTag;
 import com.frank.vmall.utils.storage.MallPreference;
 import com.frank.vmall.utils.timer.BaseTimerTask;
@@ -30,6 +35,7 @@ public class LauncherDelegate extends VmallDelegate implements ITimerListener {
 
     private Timer mTimer;
     private int mCount = 5;
+    private ILauncherListener mLauncherListener;
 
     @OnClick(R2.id.tv_launcher_timer)
     void onClickTimerView() {
@@ -47,6 +53,14 @@ public class LauncherDelegate extends VmallDelegate implements ITimerListener {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof ILauncherListener) {
+            mLauncherListener = (ILauncherListener) activity;
+        }
+    }
+
+    @Override
     public Object setLayout() {
         return R.layout.delegate_launcher;
     }
@@ -61,6 +75,21 @@ public class LauncherDelegate extends VmallDelegate implements ITimerListener {
             start(new LauncherScrollDelegate(), SINGLETASK);
         } else {
             // 检查用户是否登录了APP
+            AccountManager.checkAccount(new IUserChecker() {
+                @Override
+                public void onSignIn() {
+                    if (mLauncherListener != null) {
+                        mLauncherListener.onLauncherFinish(OnLauncherFinishTag.SIGNED);
+                    }
+                }
+
+                @Override
+                public void onNotSignIn() {
+                    if (mLauncherListener != null) {
+                        mLauncherListener.onLauncherFinish(OnLauncherFinishTag.NOT_SIGNED);
+                    }
+                }
+            });
         }
     }
 

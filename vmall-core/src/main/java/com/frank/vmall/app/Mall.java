@@ -1,6 +1,7 @@
 package com.frank.vmall.app;
 
 import android.content.Context;
+import android.os.Handler;
 
 import java.util.HashMap;
 
@@ -15,6 +16,10 @@ public final class Mall {
         return Configurator.getInstance();
     }
 
+    public static Configurator getConfigurator() {
+        return Configurator.getInstance();
+    }
+
     public static HashMap<Object, Object> getConfigurations() {
         return Configurator.getInstance().getMallConfigs();
     }
@@ -22,4 +27,13 @@ public final class Mall {
     public static Context getApplicationContext() {
         return (Context) getConfigurations().get(ConfigKeys.APPLICATION_CONTEXT);
     }
+
+    public static <T> T getConfiguration(Object key) {
+        return getConfigurator().getConfiguration(key);
+    }
+
+    public static Handler getHandler() {
+        return getConfiguration(ConfigKeys.HANDLER);
+    }
+
 }
